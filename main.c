@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <math.h>
 
 void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B);
@@ -12,10 +11,10 @@ int** allocateMemory(int rows, int cols);
 void clearMemory(int** matrix, int Nb);
 
 void max_min(int Na, int Nb, int Mb, int** A, int** B);
-void transpose(int Nb, int Mb, int** B);
-void multiply(int Nb, int Mb, int** A, int** B);
+void transpose(int** T, int Nb, int Mb, int** B);
+void multiply(int** Multi, int Nb, int Mb, int** A, int** B);
 void sort(int Na, int** A);
-void sum(int Nb, int Mb, int** A, int** B);
+void sum(int Na, int Nb, int Mb, int** A, int** B);
 
 int main() {
 
@@ -36,10 +35,6 @@ int main() {
 		printf("\n\t[Columns] = ");
 		scanf_s("%d", &Nb);
 
-		/*if (Na <= 0 || Nb <= 0 || Mb <= 0) {
-			printf("\nInvalid values! Please, try again.\n(Amount of rows/columns cannot be < 1).\n");
-		}*/
-
 		if (Na != Mb) {
 
 			printf("\nRows of matrix B must match with columns of matrix A. Otherwise, you won't be able to multiplication. Are You sure?\n\t[1] - Continue\n\t[2] - Enter values again");
@@ -54,38 +49,17 @@ int main() {
 	}
 
 	int** A = allocateMemory(Na, Na);
-	int** B = allocateMemory(Nb, Mb);
+	int** B = allocateMemory(Mb, Nb);
+	int** Multi = allocateMemory(Mb, Nb);
+	int** T = allocateMemory(Mb, Nb);
 
-	/*int** A = NULL;
-	A = (int**)malloc(Na * sizeof(int));
-
-	for (int i = 0; i < Na; i++) {
-		A[i] = (int*)malloc(Na * sizeof(int));
-	}
-
-	int** B = NULL;
-	B = (int**)malloc(Nb * sizeof(int));
-
-	int** T = NULL;
-	T = (int**)malloc(Mb * sizeof(int));
-
-	int** Multi = NULL;
-	Multi = (int**)malloc(Nb * sizeof(int));
-
-
-	for (int i = 0; i < Nb; i++) {
-		B[i] = (int*)malloc(Mb * sizeof(int));
-		Multi[i] = (int*)malloc(Mb * sizeof(int));
-		T[i] = (int*)malloc(Mb * sizeof(int));
-	}*/
-
-	while (fillMode <= 0 || fillMode > 4) {
+	while (fillMode <= 0 || fillMode > 2) {
 
 		printf("\nChoose a fill mode:\n\t[1] - Enter values manually\n\t[2] - Generate values automatically\n\t");
 		printf("\n\tOption: ");
 		scanf_s("%d", &fillMode);
 
-		if (fillMode < 1 || fillMode > 2) {
+		if (fillMode <= 0 || fillMode > 2) {
 			printf("Invalid option! Please, try again.\n");
 		}
 	}
@@ -97,7 +71,7 @@ int main() {
 		int doNext = 0;
 
 		do {
-			printf("\nChoose an operation:\n\t[1] - Show the maximum and minimum value of matrix A\n\t[2] - Transpose matrix B\n\t[3] - Multiply matrix A by B (A * B)\n\t[4] - Sort matrix A\n\t[5] - Add matrix A to B (A + B)\n\t[6] - Exit the program");
+			printf("\nChoose an operation:\n\t[1] - Show the maximum and minimum value of matrix A\n\t[2] - Transpose matrix B\n\t[3] - Multiply matrix A by B (A * B)\n\t[4] - Sort matrix A\n\t[5] - Summarize matrix A rows and matrix B columns \n\t[6] - Exit the program\n");
 			printf("\n\tOption: ");
 			scanf_s("%d", &doNext);
 		} while (doNext < 1 && doNext > 5);
@@ -108,15 +82,16 @@ int main() {
 			max_min(Na, Nb, Mb, A, B);
 			break;
 		case 2:
-			transpose(Nb, Mb, B);
+			transpose(T, Nb, Mb, B);
 			break;
 		case 3:
 
 			if (Na != Mb) {
-				printf("\nInvalid option selected! Please, try again.");
+				printf("\nInvalid option selected! Please, try again.\n");
+				break;
 			}
 			else {
-				multiply(Nb, Mb, A, B);
+				multiply(Multi, Nb, Mb, A, B);
 				break;
 			}
 			
@@ -124,11 +99,17 @@ int main() {
 			sort(Na, A);
 			break;
 		case 5:
-			sum(Nb, Mb, A, B);
+			sum(Na, Nb, Mb, A, B);
 			break;
 		case 6:
+			system("cls");
+			printf("\nProgram finished succesfully.\n");
+
 			clearMemory(A, Na);
-			clearMemory(B, Nb);
+			clearMemory(B, Mb);
+			clearMemory(T, Mb);
+			clearMemory(Multi, Mb);
+
 			return 0;
 
 		default:
@@ -136,141 +117,8 @@ int main() {
 
 		}	
 	}
-	
+
 	return 0;
-}
-
-int** allocateMemory(int rows, int cols) {
-
-	int** matrix = (int**)malloc(rows * sizeof(int*));
-
-	for (int i = 0; i < rows; i++) {
-		matrix[i] = (int*)malloc(cols * sizeof(int));
-	}
-
-	return matrix;
-
-}
-
-void clearMemory(int** matrix, int rows) {
-	int i;
-
-	for (i = 0; i < rows; i++) {
-		free(matrix[i]);
-	}
-
-	free(matrix);
-}
-
-void sort(int Na, int** A) {
-
-	int sortMode;
-
-	printf("\nChoose sort mode:\n\t[1] - Sort matrix in ascending order\n\t[2] - Sort the row selected by user\n");
-	printf("\n\tOption: ");
-	scanf_s("%d", &sortMode);
-
-	if (sortMode == 1) {
-
-		for (int i = 0; i < Na; i++) {
-			for (int j = 0; j < Na; j++) {
-			
-					
-				for (int k = i + 1; k < Na; k++) {
-					
-			
-						
-						if (A[i][j] > A[i][k]) {
-							
-							int temp = A[i][j];
-							A[i][j] = A[i][k];
-							A[i][k] = temp;
-						
-						}
-						
-				}
-			}
-		}
-	}
-	else {
-
-		int sort = 0;
-
-		printf("\nEnter the row to sort: ");
-		scanf_s("%d", &sort);
-
-		for (int i = 1; i < Na; i++) {
-			for (int j = 0; j < Na - i; j++) {
-
-				if (A[sort][j] > A[sort][j + 1]) {
-
-					int temp = A[sort][j];
-					A[sort][j] = A[sort][j + 1];
-					A[sort][j + 1] = temp;
-
-				}
-
-			}
-		}
-	}
-
-	/*for (int p = 1; p < Na; p++) {
-		for (int j = 0; j < Na - p; j++) {
-			if (A[sort][j] > A[sort][j + 1]) {
-				int temp = A[sort][j];
-				A[sort][j] = A[sort][j + 1];
-				A[sort][j + 1] = temp;
-			}
-		}
-	}*/
-
-	printf("\nSorted matrix A:\n\n");
-
-	for (int i = 0; i < Na; i++) {
-
-		printf("\t");
-
-		for (int j = 0; j < Na; j++)
-		{
-			printf("%5d", A[i][j]);
-		}
-
-		printf("\n");
-	}
-
-		/*for (int k = 0; k < Na * Na; k++) {
-
-			for (int i = 0; i < Na; i++) {
-				
-				for (int j = 0; j < Na - 1; j++) {
-
-					if (A[i][j] > A[i][j + 1]) {
-						int temp = A[i][j];
-						A[i][j] = A[i][j + 1];
-						A[i][j + 1] = temp;
-					}
-				}
-			}
-			for (int i = 0; i < Na - 1; i++) {
-				if (A[i][Na - 1] > A[i + 1][0]) {
-					int temp = A[i][Na - 1];
-					A[i][Na - 1] = A[i + 1][0];
-					A[i + 1][0] = temp;
-				}
-			}
-		}*/
-
-		
-
-	/*case 2:
-		printf("\nEnter the line to sort: ");
-		scanf("%d", &sort);
-
-		for (int k = 1; k < Na; k++) {
-			for (int j = 0; j < Na - k; j++) {
-				if (A[sort][j] > )
-			}
-		}*/
 }
 
 void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B) {
@@ -290,16 +138,15 @@ void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B) {
 
 		printf("\nEnter values for matrix B:");
 
-		for (int i = 0; i < Nb; i++) {
+		for (int i = 0; i < Mb; i++) {
 
-			for (int j = 0; j < Mb; j++) {
+			for (int j = 0; j < Nb; j++) {
 
 				printf("\n\tEnter B[%d][%d] = ", i, j);
 				scanf_s("%d", &B[i][j]);
 			}
 		}
 	}
-
 	else {
 
 		for (int i = 0; i < Na; i++) {
@@ -318,6 +165,8 @@ void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B) {
 			}
 		}
 	}
+
+
 
 	result(Na, Nb, Mb, A, B);
 }
@@ -356,38 +205,108 @@ void result(int Na, int Nb, int Mb, int** A, int** B) {
 
 }
 
-void multiply(int Nb, int Mb, int** A, int** B) {
+int** allocateMemory(int rows, int cols) {
 
-	int** Multi = allocateMemory(Nb, Mb);
+	int** matrix = (int**)malloc(rows * sizeof(int*));
 
-	for (int i = 0; i < Mb; i++) {
+	for (int i = 0; i < rows; i++) {
+		matrix[i] = (int*)malloc(cols * sizeof(int));
+	}
 
-		for (int j = 0; j < Nb; j++) {
+	return matrix;
 
-			Multi[i][j] = 0;
+}
 
-			for (int k = 0; k < Mb; k++) {
+void clearMemory(int** matrix, int rows) {
 
-				Multi[i][j] += A[i][k] * B[k][j];
+	for (int i = 0; i < rows; i++) {
+		free(matrix[i]);
+	}
+
+	free(matrix);
+}
+
+void sort(int Na, int** A) {
+
+	int sortMode;
+
+	printf("\nChoose sort mode:\n\t[1] - Sort matrix in ascending order\n\t[2] - Sort the row selected by user\n");
+	printf("\n\tOption: ");
+	scanf_s("%d", &sortMode);
+
+	if (sortMode == 1) {
+
+		for (int i = 0; i < Na; i++) {
+
+			for (int j = 0; j < Na; j++) {
+
+				int min = A[i][j];
+
+				int p = i;
+				int m = j;
+				int d = j;
+
+				for (int k = i; k < Na; k++) {
+
+					for (d = j; d < Na; d++) {
+
+						if (A[k][d] < min) {
+
+							min = A[k][d];
+
+							p = k;
+							m = d;
+						}
+					}
+					d = 0;
+				}
+
+				int temp = A[i][j];
+				A[i][j] = A[p][m];
+				A[p][m] = temp;
+			}
+		}
+
+	} else {
+
+		int sortRow = 0;
+
+		printf("\nEnter the row to sort: ");
+		scanf_s("%d", &sortRow);
+
+		for (int i = 0; i < Na; i++) {
+
+			for (int j = 0; j < Na; j++) {
+
+				for (int k = j + 1; k < Na; k++) {
+
+					if (A[sortRow][j] > A[sortRow][k]) {
+
+						int temp = A[sortRow][j];
+						A[sortRow][j] = A[sortRow][k];
+						A[sortRow][k] = temp;
+
+					}
+
+				}
 			}
 		}
 	}
 
-	printf("\nMultiply of matrix A and matrix B:\n\n");
+	printf("\nSorted matrix A:\n\n");
 
-	for (int i = 0; i < Mb; i++) {
+	for (int i = 0; i < Na; i++) {
 
 		printf("\t");
 
-		for (int j = 0; j < Nb; j++)
+		for (int j = 0; j < Na; j++)
 		{
-			printf("%5d", Multi[i][j]);
+			printf("%5d", A[i][j]);
 		}
 
 		printf("\n");
 	}
 
-	clearMemory(Multi, Nb);
 }
 
 void max_min(int Na, int Nb, int Mb, int** A, int** B) {
@@ -419,9 +338,7 @@ void max_min(int Na, int Nb, int Mb, int** A, int** B) {
 	printf("\nMinimum value of matrix A: %d\n", min);
 }
 
-void transpose(int Nb, int Mb, int** B) {
-
-	int** T = allocateMemory(Nb, Mb);
+void transpose(int** T, int Nb, int Mb, int** B) {
 
 	for (int i = 0; i < Mb; i++) {
 
@@ -444,19 +361,45 @@ void transpose(int Nb, int Mb, int** B) {
 
 		printf("\n");
 	}
-
-	clearMemory(T, Nb);
 }
 
-void sum(int Nb, int Mb, int** A, int** B) {
+void multiply(int** Multi, int Nb, int Mb, int** A, int** B) {
+
+	for (int i = 0; i < Mb; i++) {
+
+		for (int j = 0; j < Nb; j++) {
+
+			Multi[i][j] = 0;
+
+			for (int k = 0; k < Mb; k++) {
+
+				Multi[i][j] += A[i][k] * B[k][j];
+			}
+		}
+	}
+
+	printf("\nMultiplication of matrix A and matrix B:\n\n");
+
+	for (int i = 0; i < Mb; i++) {
+
+		printf("\t");
+
+		for (int j = 0; j < Nb; j++)
+		{
+			printf("%5d", Multi[i][j]);
+		}
+
+		printf("\n");
+	}
+}
+
+void sum(int Na, int Nb, int Mb, int** A, int** B) {
 
 	int sum = 0;
 
-	for (int i = 0; i < Mb; i++) {
-		
-		/*sum = 0;*/
+	for (int i = 0; i < Na; i++) {
 
-		for (int j = 0; j < Nb; j++) {
+		for (int j = 0; j < Na; j++) {
 			sum += A[i][j];
 		}
 
@@ -468,8 +411,6 @@ void sum(int Nb, int Mb, int** A, int** B) {
 	sum = 0;
 
 	for (int j = 0; j < Nb; j++) {
-		
-		/*sum = 0;*/
 
 		for (int i = 0; i < Mb; i++) {
 			sum += B[i][j];
