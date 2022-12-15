@@ -16,12 +16,27 @@ void multiply(int** Multi, int Nb, int Mb, int** A, int** B);
 void sort(int Na, int** A);
 void sum(int Na, int Nb, int Mb, int** A, int** B);
 
+/* --- Additional task --- */
+void newFill(int* arr, int row, int column);
+
 int main() {
 
 	int Na = 0, Nb = 0, Mb = 0;
-	int fillMode = 0, answer = 2;
+	int fillMode, answer, launch;
+	
+	int arr[2][2];
 
-	while ((Na <= 0 && Nb <= 0 && Mb <= 0) || answer == 2) {
+	do {
+		
+		printf("\nPlease select the first step:\n\t[1] - Launch the main program\n\t[2] - Calculate the 1D matrix");
+		printf("\n\tOption: ");
+		scanf_s("%d", &launch);
+
+		if (launch == 2) newFill(&arr[0][0], 3, 5);
+
+	} while (launch < 1 || launch > 2);
+
+	do {
 
 		printf("\nEnter number of column-rows of matrix A:");
 		printf("\n\t[A] = ");
@@ -37,7 +52,7 @@ int main() {
 
 		if (Na != Mb) {
 
-			printf("\nRows of matrix B must match with columns of matrix A. Otherwise, you won't be able to multiplication. Are You sure?\n\t[1] - Continue\n\t[2] - Enter values again");
+			printf("\nRows of matrix B must match with columns of matrix A. Otherwise, you won't be able to multiplication. Are You sure?\n\t[1] - Continue\n\t[2] - Enter values again\n");
 			printf("\n\tOption: ");
 			scanf_s("%d", &answer);
 		}
@@ -46,23 +61,24 @@ int main() {
 		}
 		
 		system("cls");
-	}
+
+	} while ((Na <= 0 && Nb <= 0 && Mb <= 0) || answer == 2);
 
 	int** A = allocateMemory(Na, Na);
 	int** B = allocateMemory(Mb, Nb);
 	int** Multi = allocateMemory(Mb, Nb);
-	int** T = allocateMemory(Mb, Nb);
+	int** T = allocateMemory(Nb, Mb);
 
-	while (fillMode <= 0 || fillMode > 2) {
+	do {
 
 		printf("\nChoose a fill mode:\n\t[1] - Enter values manually\n\t[2] - Generate values automatically\n\t");
 		printf("\n\tOption: ");
 		scanf_s("%d", &fillMode);
 
 		if (fillMode <= 0 || fillMode > 2) {
-			printf("Invalid option! Please, try again.\n");
+			printf("\nInvalid option! Please, try again.\n");
 		}
-	}
+	} while (fillMode <= 0 || fillMode > 2);
 
 	fill(fillMode, Na, Nb, Mb, A, B);
 
@@ -107,7 +123,7 @@ int main() {
 
 			clearMemory(A, Na);
 			clearMemory(B, Mb);
-			clearMemory(T, Mb);
+			clearMemory(T, Nb);
 			clearMemory(Multi, Mb);
 
 			return 0;
@@ -117,15 +133,49 @@ int main() {
 
 		}	
 	}
+}
 
-	return 0;
+/* --- Additional task --- */
+void newFill(int* arr, int row, int column) {
+
+	system("cls");
+	printf("\nEnter values for the matrix:");
+
+	for (int i = 0; i < row; i++) {
+	
+		for (int j = 0; j < column; j++) {
+			
+			printf("\n\tEnter Matrix[%d][%d] = ", i + 1, j + 1);
+			scanf_s("%d", &arr[i * column + j]);
+		
+		}
+		
+	}
+
+	system("cls");
+	printf("\nResult:\n\n");
+
+	for (int i = 0; i < 3; i++) {
+
+		printf("\t");
+
+		for (int j = 0; j < column; j++)
+		{
+			printf("%5d", arr[i * column + j]);
+		}
+
+		printf("\n");
+	}
+
+	exit(0);
+
 }
 
 void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B) {
 
 	if (fillMode == 1) {
 
-		printf("\nEnter values for matrix A:");
+		printf("\nEnter values for the matrix A:");
 
 		for (int i = 0; i < Na; i++) {
 
@@ -136,7 +186,7 @@ void fill(int fillMode, int Na, int Nb, int Mb, int** A, int** B) {
 			}
 		}
 
-		printf("\nEnter values for matrix B:");
+		printf("\nEnter values for the matrix B:");
 
 		for (int i = 0; i < Mb; i++) {
 
@@ -262,6 +312,7 @@ void sort(int Na, int** A) {
 				}
 
 				int temp = A[i][j];
+
 				A[i][j] = A[p][m];
 				A[p][m] = temp;
 			}
@@ -271,8 +322,16 @@ void sort(int Na, int** A) {
 
 		int sortRow = 0;
 
-		printf("\nEnter the row to sort: ");
-		scanf_s("%d", &sortRow);
+		do {
+
+			printf("\nEnter the row to sort: ");
+			scanf_s("%d", &sortRow);
+
+			if (&sortRow > Na) {
+				printf("\nInvalid value entered! Try again.\n");
+			}
+
+		} while (&sortRow > Na);
 
 		for (int i = 0; i < Na; i++) {
 
@@ -283,6 +342,7 @@ void sort(int Na, int** A) {
 					if (A[sortRow][j] > A[sortRow][k]) {
 
 						int temp = A[sortRow][j];
+
 						A[sortRow][j] = A[sortRow][k];
 						A[sortRow][k] = temp;
 
