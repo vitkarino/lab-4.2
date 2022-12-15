@@ -24,11 +24,11 @@ int main() {
 	int Na = 0, Nb = 0, Mb = 0;
 	int fillMode, answer, launch;
 	
-	int arr[2][2];
+	int arr[3][5];
 
 	do {
 		
-		printf("\nPlease select the first step:\n\t[1] - Launch the main program\n\t[2] - Calculate the 1D matrix");
+		printf("\nPlease select the first step:\n\t[1] - Launch the main program\n\t[2] - Generate the rectangle matrix (Additional task)");
 		printf("\n\tOption: ");
 		scanf_s("%d", &launch);
 
